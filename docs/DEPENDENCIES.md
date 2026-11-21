@@ -29,4 +29,4 @@ See [../widgets/WIDGETS.md](../widgets/WIDGETS.md).
 
 ## Tools used by the scripts
 
-`python3`, `bash`, `kpackagetool6`, optional `qdbus6` (reloads KWin after settings change).
+`python3`, `bash`, `kpackagetool6`, optional `qdbus-qt6` / `qdbus6` (reloads KWin after settings change).

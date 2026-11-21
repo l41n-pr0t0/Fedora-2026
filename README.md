@@ -5,13 +5,42 @@ My KDE Plasma desktop on Fedora 45: a dark violet "Lain / Wired" look with NieR:
 Everything needed to rebuild it is in this repo or linked from it. No personal data is included. The wallpapers are not bundled (see [docs/WALLPAPER.md](docs/WALLPAPER.md)).
 
 <p align="center">
-  <img src="assets/top-panel.png" alt="Top panel" width="100%"/>
-</p>
-<p align="center">
-  <img src="assets/right-panel.png" alt="Right panel" height="480"/>
+  <img src="assets/desktop.jpg" alt="Full desktop: Lain wallpaper, LCD clock, Wired Vitals and Wired Snake widgets, top and right panels" width="100%"/>
 </p>
 
-> Full-desktop screenshots and a demo video are still to be added.
+## Gallery
+
+<p align="center">
+  <img src="assets/desktop-launcher.jpg" alt="Desktop with the Andromeda launcher open" width="100%"/>
+  <br/><sub>Andromeda launcher open over the desktop</sub>
+</p>
+
+<p align="center">
+  <img src="assets/widgets.jpg" alt="Desktop widgets: LCD clock, Wired Vitals, Wired Snake" width="38%"/>
+  &nbsp;
+  <img src="assets/launcher.jpg" alt="Andromeda launcher close-up" width="58%"/>
+  <br/><sub>Left: Reloj LCD clock, Wired Vitals and Wired Snake (my widgets). Right: Andromeda launcher.</sub>
+</p>
+
+### Top panel
+
+<p align="center">
+  <img src="assets/top-panel.png" alt="Full top panel" width="100%"/>
+</p>
+<p align="center">
+  <img src="assets/top-panel-left.png" alt="Top panel, left side: launcher, separator, Chorus media controls" width="100%"/>
+  <img src="assets/top-panel-right.png" alt="Top panel, right side: netspeed, CatWalk, system tray, Control Station" width="100%"/>
+  <br/><sub>Zoomed: left side (launcher, Chorus media) and right side (netspeed, CatWalk, tray, Control Station)</sub>
+</p>
+
+<details>
+<summary><b>Right panel</b> (tasks, CPU / RAM / temperature rings, trash, lock)</summary>
+<p align="center">
+  <img src="assets/right-panel.png" alt="Right panel" height="520"/>
+</p>
+</details>
+
+> A demo video is still to be added.
 
 ## Tested on
 

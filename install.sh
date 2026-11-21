@@ -93,7 +93,11 @@ if [ "$SDDM" = 1 ]; then
   echo "NOTE: add bg.mp4 / bg.png / font/ to /usr/share/sddm/themes/nier-automata (see docs/BOOT-LOGIN.md)."
 fi
 
-if [ "$DRY" = 0 ] && command -v qdbus6 >/dev/null; then qdbus6 org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true; fi
+if [ "$DRY" = 0 ]; then
+  for q in qdbus6 qdbus-qt6 qdbus; do
+    command -v "$q" >/dev/null && { "$q" org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true; break; }
+  done
+fi
 
 cat <<EOF
 
