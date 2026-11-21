@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "l41n@wired.navi",
+                "Name": "l41n-pr0t0"
+            }
+        ],
+        "Description": "NieR:Automata Cyberpunk Look and Feel for Plasma 6",
+        "Id": "org.kde.nier-automata.desktop",
+        "License": "GPLv2+",
+        "Name": "NieR:Automata",
+        "Website": "https://github.com",
+        "X-Plasma-APIVersion": 2
+    },
+    "X-Plasma-APIVersion": 2
+}

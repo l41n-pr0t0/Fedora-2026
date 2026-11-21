@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "System"
+            }
+        ],
+        "Description": "Launch default web browser on Meta+F",
+        "Icon": "internet-web-browser",
+        "Id": "open-browser-shortcut",
+        "Name": "Open Browser Shortcut",
+        "Version": "1.0"
+    },
+    "X-Plasma-API": "javascript"
+}

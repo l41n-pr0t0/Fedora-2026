@@ -1,0 +1,7 @@
+*.bak
+*.bak-*
+*.orig
+*.log
+.env
+*.key
+*.pem

@@ -1,0 +1,33 @@
+[General]
+AccentColor=167,139,250
+ColorScheme=LainWired
+LastUsedCustomAccentColor=167,139,250
+TerminalApplication=kitty
+TerminalService=kitty.desktop
+UseSystemBell=true
+XftAntialias=true
+XftHintStyle=hintslight
+XftSubPixel=rgb
+accentColorFromWallpaper=false
+fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
+
+[Icons]
+Theme=Papirus
+
+[KDE]
+AnimationDurationFactor=0.75
+LookAndFeelPackage=org.kde.breezedark.desktop
+ShowDeleteCommand=false
+contrast=4
+frameContrast=0.2
+widgetStyle=Darkly
+
+[WM]
+activeBackground=20,20,38
+activeBlend=20,20,38
+activeFont=Noto Sans,10,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Medium,0,0
+activeForeground=200,160,255
+inactiveBackground=26,10,42
+inactiveBlend=26,10,42
+inactiveForeground=170,150,200
+
