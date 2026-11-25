@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# limine-sync (Fedora port of /etc/nixos/limine-sync.sh)
+# Builds a Limine menu from Fedora's BLS entries (/boot/loader/entries), copies the newest
+# kernels to the ESP (Limine only reads FAT), enrolls the config BLAKE2b hash into Limine and
+# signs it with the enrolled akmods MOK key, so it boots under Secure Boot through Fedora's shim:
+#   firmware -> \EFI\limine\shimx64.efi (Microsoft-signed) -> \EFI\limine\grubx64.efi (= Limine, MOK-signed)
+# shim keeps MokListRT populated, so akmods-signed modules (NVIDIA, v4l2loopback, legion) still load.
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "run as root" >&2; exit 1; }
+
+ESP=/boot/efi
+CONF_DIR=/etc/limine
+KDIR=$ESP/limine/kernels
+LDIR=$ESP/EFI/limine
+KEEP=${LIMINE_KEEP:-2}
+KEY=/etc/pki/akmods/private/private_key.priv
+CERT_DER=/etc/pki/akmods/certs/public_key.der
+CERT_PEM=$CONF_DIR/mok-cert.pem
+UNSIGNED=$CONF_DIR/BOOTX64.unsigned
+STAMP=$CONF_DIR/.last-sync
+WIN_UUID=e63c118c-207f-47b9-b045-b4f3bec8d8ca
+
+mountpoint -q $ESP || { echo "ESP not mounted at $ESP" >&2; exit 1; }
+[ -f "$UNSIGNED" ] || { echo "missing $UNSIGNED" >&2; exit 1; }
+[ -f "$CERT_PEM" ] || openssl x509 -inform der -in "$CERT_DER" -out "$CERT_PEM"
+
+# grub env vars referenced by BLS entries ($tuned_params, $tuned_initrd)
+declare -A GENV=()
+while IFS='=' read -r k v; do [ -n "$k" ] && GENV[$k]=$v; done < <(grub2-editenv - list 2>/dev/null || true)
+expand() { local s="$1" out="" w; for w in $s; do if [[ $w == \$* ]]; then w=${GENV[${w#\$}]:-}; fi; [ -n "$w" ] && out+="$w "; done; echo "${out% }"; }
+
+# newest $KEEP non-rescue entries
+mapfile -t ENTRIES < <(for f in /boot/loader/entries/*.conf; do v=$(awk '$1=="version"{print $2}' "$f"); [[ $v == 0-rescue* ]] && continue; echo "$v $f"; done | sort -rV | head -n "$KEEP" | cut -d' ' -f2-)
+[ ${#ENTRIES[@]} -ge 1 ] || { echo "no BLS entries found" >&2; exit 1; }
+
+# skip if nothing changed (entries, kernels, initramfs, this script, template, wallpaper)
+SIG=$( { for f in "${ENTRIES[@]}"; do cat "$f"; v=$(awk '$1=="version"{print $2}' "$f"); stat -c '%n %s %Y' /boot/vmlinuz-$v /boot/initramfs-$v.img; done; grub2-editenv - list 2>/dev/null | grep tuned; sha256sum "$0" "$UNSIGNED" $CONF_DIR/lain.png $ESP/EFI/fedora/shimx64.efi $ESP/EFI/fedora/mmx64.efi 2>/dev/null; } | sha256sum | cut -d' ' -f1)
+if [ "${1:-}" != "--force" ] && [ -f "$STAMP" ] && [ "$(cat $STAMP)" = "$SIG" ] && [ -f $LDIR/grubx64.efi ]; then
+  echo "limine-sync: up to date"; exit 0
+fi
+
+mkdir -p "$KDIR" "$LDIR" $ESP/limine/wallpapers
+ACTIVE=" "
+MAIN_TXT=""; ADV_TXT=""; REC_TXT=""
+first=1
+REL=$(. /etc/os-release; echo "$NAME $VERSION_ID")
+for f in "${ENTRIES[@]}"; do
+  v=$(awk '$1=="version"{print $2}' "$f")
+  linux=$(awk '$1=="linux"{print $2}' "$f")
+  initrd=$(awk '$1=="initrd"{$1=""; print}' "$f")
+  opts=$(expand "$(awk '$1=="options"{$1=""; print}' "$f")")
+  vopts=$(echo " $opts " | sed -E 's/ (rhgb|quiet) / /g; s/ (rhgb|quiet) / /g; s/^ //; s/ $//')
+  k_dst=$KDIR/$v-vmlinuz
+  cmp -s "/boot$linux" "$k_dst" 2>/dev/null || cp -f "/boot$linux" "$k_dst"
+  ACTIVE+="$v-vmlinuz "
+  k_hash=$(b2sum "$k_dst" | cut -d' ' -f1)
+  mods=""; n=0
+  for i in $(expand "$initrd"); do
+    i_dst=$KDIR/$v-initrd; [ $n -eq 0 ] || i_dst+="-$n"
+    cmp -s "/boot$i" "$i_dst" 2>/dev/null || cp -f "/boot$i" "$i_dst"
+    ACTIVE+="$(basename "$i_dst") "
+    mods+="module_path: boot():/limine/kernels/$(basename "$i_dst")#$(b2sum "$i_dst" | cut -d' ' -f1)"$'\n'
+    n=$((n+1))
+  done
+  kv=${v%%.fc*}
+  # entry <indent> <title> <comment> <cmdline>
+  entry() {
+    printf '%s%s\n' "$1" "$2"
+    printf '%s  comment: %s\n' "$1" "$3"
+    printf '%s  protocol: linux\n' "$1"
+    printf '%s  kernel_path: boot():/limine/kernels/%s-vmlinuz#%s\n' "$1" "$v" "$k_hash"
+    printf '%s  cmdline: %s\n' "$1" "$4"
+    printf '%s' "$mods" | sed "s/^/$1  /"
+    echo
+  }
+  if [ $first -eq 1 ]; then
+    MAIN_TXT+=$(entry "  " "//$REL" "Linux $kv  |  default" "$opts")$'\n\n'
+    ADV_TXT+=$(entry "    " "///Linux $kv  (verbose)" "Show boot messages, no splash" "$vopts")$'\n\n'
+    REC_TXT+=$(entry "    " "///Linux $kv  (recovery)" "Single-user rescue shell" "$vopts systemd.unit=rescue.target")$'\n\n'
+  else
+    ADV_TXT+=$(entry "    " "///Linux $kv  (previous)" "Previous kernel" "$opts")$'\n\n'
+  fi
+  first=0
+done
+
+# prune kernels no longer referenced
+for f in "$KDIR"/*; do [ -f "$f" ] || continue; case "$ACTIVE" in *" $(basename "$f") "*) ;; *) echo "pruning $(basename "$f")"; rm -f "$f";; esac; done
+
+WALL=""
+if [ -f $CONF_DIR/lain.png ]; then
+  cmp -s $CONF_DIR/lain.png $ESP/limine/wallpapers/lain.png || cp -f $CONF_DIR/lain.png $ESP/limine/wallpapers/lain.png
+  WALL="wallpaper: boot():/limine/wallpapers/lain.png#$(b2sum $ESP/limine/wallpapers/lain.png | cut -d' ' -f1)"
+fi
+
+CONF=$(mktemp)
+cat > "$CONF" <<EOF
+timeout: 3
+editor_enabled: no
+hash_mismatch_panic: no
+remember_last_entry: yes
+graphics: yes
+default_entry: 1
+$WALL
+wallpaper_style: centered
+backdrop: 000000
+interface_resolution: 1920x1080
+interface_branding: wired://boot
+interface_branding_colour: d9a8ff
+interface_help_colour: d9a8ff
+interface_help_hidden: no
+term_font_scale: 2x2
+
+/+$REL
+  comment: KDE Plasma  |  wired_navi0x17
+$MAIN_TXT
+  //Advanced options
+    comment: Older kernels, verbose and recovery boot
+$ADV_TXT
+$REC_TXT
+    ///GRUB  (Fedora shim)
+      comment: Fedora GRUB menu, incl. rescue kernel
+      protocol: efi
+      path: boot():/EFI/fedora/shimx64.efi
+
+/+Other systems
+  comment: Windows and firmware loaders
+
+  //Windows
+    comment: Windows Boot Manager
+    protocol: efi
+    path: uuid($WIN_UUID):/EFI/Microsoft/Boot/bootmgfw.efi
+
+  //UEFI fallback
+    comment: Default removable-media loader
+    protocol: efi
+    path: boot():/EFI/boot/bootx64.efi
+EOF
+
+HASH=$(b2sum "$CONF" | cut -d' ' -f1)
+[ ${#HASH} -eq 128 ] || { echo "bad config hash" >&2; exit 1; }
+
+# shim from Fedora loads grubx64.efi from its own directory -> that is Limine
+cp -f $ESP/EFI/fedora/shimx64.efi $LDIR/shimx64.efi
+cp -f $ESP/EFI/fedora/mmx64.efi $LDIR/mmx64.efi
+TMPE=$(mktemp)
+cp -f "$UNSIGNED" "$TMPE"
+limine enroll-config "$TMPE" "$HASH" >/dev/null
+sbsign --key "$KEY" --cert "$CERT_PEM" --output "$TMPE.signed" "$TMPE" >/dev/null 2>&1
+sbverify --cert "$CERT_PEM" "$TMPE.signed" >/dev/null 2>&1 || { echo "signature verification failed" >&2; exit 1; }
+grep -q -a -F "$HASH" "$TMPE.signed" || { echo "enrolled hash missing" >&2; exit 1; }
+
+# install config first, then binary (both must match)
+install -m644 "$CONF" $LDIR/limine.conf
+install -m644 "$CONF" $ESP/limine/limine.conf
+install -m644 "$TMPE.signed" $LDIR/grubx64.efi
+rm -f "$CONF" "$TMPE" "$TMPE.signed"
+sync -f $ESP 2>/dev/null || sync
+echo "$SIG" > "$STAMP"
+echo "limine-sync: ${#ENTRIES[@]} kernel(s), config hash ${HASH:0:16}... enrolled, Limine signed with MOK key"

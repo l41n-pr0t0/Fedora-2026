@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# kernel-install plugin: refresh the Limine menu after kernel add/remove
+[ "$1" = add ] || [ "$1" = remove ] || exit 0
+/usr/local/sbin/limine-sync || echo "limine-sync failed (GRUB entry still works)" >&2
+exit 0

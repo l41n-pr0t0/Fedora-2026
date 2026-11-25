@@ -19,7 +19,14 @@ Everything needed to rebuild it is in this repo or linked from it. No personal d
   <img src="assets/widgets.jpg" alt="Desktop widgets: LCD clock, Wired Vitals, Wired Snake" width="38%"/>
   &nbsp;
   <img src="assets/launcher.jpg" alt="Andromeda launcher close-up" width="58%"/>
-  <br/><sub>Left: Reloj LCD clock, Wired Vitals and Wired Snake (my widgets). Right: Andromeda launcher.</sub>
+  <br/><sub>Left: Reloj LCD clock, Wired Vitals and Wired Snake (my widgets). Right: the Meta menu, Andromeda restyled as "Wired" (live clock, mono labels, violet accents, scanlines).</sub>
+</p>
+
+### Bootloader
+
+<p align="center">
+  <img src="assets/limine.png" alt="Limine boot menu: wired://boot branding, Fedora / Advanced / Other systems tree, Lain wallpaper" width="100%"/>
+  <br/><sub>Limine 10 under Secure Boot (shim → MOK-signed Limine). Config and sync script: <a href="boot-login/limine/">boot-login/limine/</a></sub>
 </p>
 
 ### Top panel
@@ -68,7 +75,8 @@ Other Plasma 6 versions may work, but widgets such as Panel Colorizer and Better
 | Window effects | 43 shader effects (dissolve, glitch, ripple, smoke...) | yes: `kwin/effects/` |
 | Lock screen | NieR look-and-feel package | yes: `plasma/look-and-feel/` |
 | Login screen | SDDM "nier-automata" | QML yes, media no: [docs/BOOT-LOGIN.md](docs/BOOT-LOGIN.md) |
-| Bootloader | Limine, Lain background | notes: [docs/BOOT-LOGIN.md](docs/BOOT-LOGIN.md) |
+| Meta menu | Andromeda Launcher, "Wired" restyle | yes: `widgets/AndromedaLauncher-wired/` |
+| Bootloader | Limine, Lain background | yes: `boot-login/limine/` + [docs/BOOT-LOGIN.md](docs/BOOT-LOGIN.md) |
 | Terminal / shell | kitty, fish, fastfetch | [dotfiles-cachyos](https://github.com/l41n-pr0t0/dotfiles-cachyos) |
 
 ## Panel layout

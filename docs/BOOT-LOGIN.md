@@ -13,8 +13,22 @@
 
 ## Limine
 
-I boot through Limine on Fedora with Secure Boot on. The config is generated per machine, with partition UUIDs, machine ID and file hashes, so it is not published here.
+![Limine menu](../assets/limine.png)
 
-What carries over is the look: a `wallpaper:` image and the `interface_branding` / colour options in `limine.conf`. Limine's own docs: https://github.com/Limine-Bootloader/Limine/blob/v12.x/CONFIG.md
+I boot through Limine on Fedora with Secure Boot on. My files are in `boot-login/limine/`:
+
+| File | Installed at | What it does |
+|---|---|---|
+| `limine.conf` | `/boot/efi/limine/limine.conf` (copy in `\EFI\limine\`) | The menu: theme options and the Fedora / Advanced / Other systems tree. It is generated, so don't hand-edit it on the machine |
+| `limine-sync` | `/usr/local/sbin/limine-sync` | Builds `limine.conf` from Fedora's BLS entries, copies kernels to the ESP, enrolls the config hash and MOK-signs Limine |
+| `95-limine.install` | `/etc/kernel/install.d/` | kernel-install hook: reruns `limine-sync` on kernel add/remove |
+
+The config contains my partition UUIDs, file hashes and kernel cmdline (NVIDIA / Legion options). On another machine, keep the theme block at the top (`wallpaper`, `interface_branding*`, `term_font_scale`, `backdrop`) and let `limine-sync` generate the rest. Edit `WIN_UUID` and the cmdline in `limine-sync` first. The wallpaper (`lain.png`) is not included.
+
+The config hash is enrolled into the signed binary. If you edit `limine.conf` without rerunning `limine-sync`, Limine panics with "CHECKSUM MISMATCH FOR CONFIG FILE".
+
+The screenshot comes from booting the same signed Limine binary, config and wallpaper in QEMU/OVMF.
+
+Limine's own docs: https://github.com/Limine-Bootloader/Limine/blob/v12.x/CONFIG.md
 
 Gotcha under Fedora's shim: Limine needs an `.sbat` section or shim refuses to load it ("Verification failed: Security Violation"). Add one with `objcopy --add-section .sbat=...` before signing.

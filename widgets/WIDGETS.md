@@ -32,3 +32,9 @@ Panel Colorizer also installs a QML plugin system-wide (`org/kde/plasma/panelcol
 ## Stock Plasma widgets used
 
 Icons-only Task Manager, System Monitor (CPU, memory and sensor rings), Panel Spacer, Trash, Lock/Logout, System Tray and the tray items listed in the main README.
+
+## AndromedaLauncher-wired (the Meta menu)
+
+`widgets/AndromedaLauncher-wired/` is Andromeda Launcher 0.6 with a Lain/Wired restyle. It adds a new header (`WiredHeader.qml`: avatar ring with orbiting dots, a `user@host` line, greeting, date and a live clock), uppercase monospace section labels with rule lines, a violet tinted highlight with an accent bar, a search bar with a `❯` prompt, corner brackets, faint scanlines and a "WIRED" watermark. The accent colour comes from the widget's *Indicator color* setting (`#d9a8ff` here). Fonts: Geist and JetBrainsMono Nerd Font Mono.
+
+Install: `cp -r widgets/AndromedaLauncher-wired ~/.local/share/plasma/plasmoids/AndromedaLauncher`, then `systemctl --user restart plasma-plasmashell`.
