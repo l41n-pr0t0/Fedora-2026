@@ -4,9 +4,7 @@ import QtQuick.Window
 // NieR: Automata style button
 // Usage: NierButton { text: "Label"; fontFamily: someFont.name; onClicked: ... }
 Item {
-    readonly property real uiScale: (typeof config !== "undefined" && config.scale !== undefined && parseFloat(config.scale) > 0)
-                                    ? parseFloat(config.scale) : 0.90
-    readonly property real s: (Screen.height / 768) * uiScale
+    readonly property real s: Screen.height / 768
     id: btn
     property string text:       ""
     property string fontFamily: ""

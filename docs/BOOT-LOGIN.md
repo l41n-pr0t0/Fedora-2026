@@ -6,10 +6,25 @@
 
 1. Install the base theme (the "Qylock" nier-automata theme by Darkkal44) or create the folder yourself.
 2. `./install.sh --sddm` copies the QML and `/etc/sddm.conf.d/10-nier.conf`.
-3. Add your own `bg.mp4`, `bg.png` and a `font/` folder to `/usr/share/sddm/themes/nier-automata/`.
+3. Add your own `bg.mp4`, `bg.jpg` and a `font/` folder to `/usr/share/sddm/themes/nier-automata/`.
 4. Test without logging out: `sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/nier-automata`.
 
-`10-nier.conf` sets the theme to `nier-automata` and the cursor to `catppuccin-frappe-pink-cursors`.
+![SDDM login](../assets/sddm.jpg)
+
+`10-nier.conf` sets the theme to `nier-automata`, the cursor to `catppuccin-frappe-pink-cursors`, and `QML_XHR_ALLOW_FILE_READ=1` in the greeter environment. The theme needs that variable to read `/sys` and `/proc`.
+
+The header is live. The right side shows battery (`BAT0`), the network link type and the clock, refreshed every 5 s. Clicking a tab opens a panel:
+
+| Tab | Shows |
+|---|---|
+| MAP | hostname, link type, default-route interface |
+| QUESTS | session list (click to select) |
+| ITEMS | laptop battery and status, Logitech mouse battery (`hidpp_battery_0`) |
+| WEAPONS | Caps/Num Lock, keyboard layout |
+| INTEL | date, time, kernel, uptime |
+| SYSTEM | Suspend / Reboot / Power Off |
+
+The wallpaper tint overlay is set to 12% opacity so the background stays bright.
 
 ## Limine
 

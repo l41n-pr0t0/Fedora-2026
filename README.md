@@ -29,6 +29,13 @@ Everything needed to rebuild it is in this repo or linked from it. No personal d
   <br/><sub>Limine 10 under Secure Boot (shim → MOK-signed Limine). Config and sync script: <a href="boot-login/limine/">boot-login/limine/</a></sub>
 </p>
 
+### Login screen
+
+<p align="center">
+  <img src="assets/sddm.jpg" alt="SDDM nier-automata login: tabbed header with live battery, network and clock, login panel over a black-and-white Lain wallpaper" width="100%"/>
+  <br/><sub>SDDM "nier-automata". The header tabs open live panels (network, sessions, battery, keyboard, system info, power). Theme: <a href="boot-login/sddm/">boot-login/sddm/</a></sub>
+</p>
+
 ### Top panel
 
 <p align="center">
